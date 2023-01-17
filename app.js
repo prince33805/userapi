@@ -45,12 +45,21 @@ mongoose
 
 app.use(express.json());
 
+
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', "*");
+  res.header('Access-Control-Allow-Methods','GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+})
+
 // set routes
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
 app.use("/register", registerRoutes);
 app.use("/", indexRoutes);
-app.use("/user", verfyToken,userRoutes);
+// app.use("/user", verfyToken,userRoutes);
+app.use("/user",userRoutes);
 
 app.listen(3000, () => {
   console.log("app 3000");
