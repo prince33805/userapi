@@ -10,85 +10,69 @@ require("dotenv").config();
 
 //auth login
 router.get("/login", (req, res) => {
-  res.render("login", { user: req.user });
+  // res.send({ user: req.user });
+  // console.log(req.status)
 });
 
-// const authorization = (req, res, next) => {
-//   const token = req.cookies.access_token;
-//   if (!token) {
-//     return res.sendStatus(403);
-//   }
+// router.post("/login", async function (req, res, next) {
 //   try {
-//     const data = jwt.verify(token, process.env.JWT_KEY);
-//     req.email = data.email;
-//     req.password = data.password;
-//     return next();
-//   } catch {
-//     return res.sendStatus(403);
+//     var { password, email } = req.body;
+//     var user = await usersModel.findOne({
+//       email: email,
+//     });
+//     if (!user) {
+//       return res.status(500).send({
+//         message: "unauthorization",
+//         success: false,
+//       });
+//     }
+//     var checkPassword = await bcrypt.compare(password, user.password);
+//     if (!checkPassword) {
+//       return res.status(500).send({
+//         message: "unauthorization",
+//         success: false,
+//       });
+//     }
+//     var { _id, email, password, fname, lname } = user;
+//     const token = jwt.sign({ _id, email, password }, process.env.JWT_KEY, {
+//       expiresIn: "1m",
+//     });
+//     return res.json({status:'ok',data:token})
+//   } catch (err) {
+//     res.status(500).send({
+//       message: err.message,
+//       success: false,
+//     });
 //   }
-// };
+// });
 
-router.post("/login", async function (req, res, next) {
-  try {
-    var { password, email } = req.body;
-    var user = await usersModel.findOne({
-      email: email,
-    });
+router.post("/login", async (req, res, next) => {
+  usersModel.findOne({ email: req.body.email }, (err, user) => {
+    if (err)
+      return res.status(500).json({
+        title: "server error",
+        error: err,
+      });
     if (!user) {
-      return res.status(500).send({
-        message: "unauthorization",
-        success: false,
+      return res.status(401).json({
+        title: "user not found",
+        error: "invalid credentials",
       });
     }
-    var checkPassword = await bcrypt.compare(password, user.password);
-    if (!checkPassword) {
-      return res.status(500).send({
-        message: "unauthorization",
-        success: false,
-      });
-    }
-    var {
-      _id,
-      email,
-      password,
-      fname,
-      lname,
-      nickname,
-      age,
-      graduated,
-      about,
-    } = user;
-    const token = jwt.sign({ _id, email, password }, process.env.JWT_KEY, {
-      expiresIn: "1h",
-    });
-    return res
-      .status(200)
-      .send({
-        data: {
-          _id,
-          email,
-          password,
-          fname,
-          lname,
-          nickname,
-          age,
-          graduated,
-          about,
-          token,
-        },
-        message: "You loged in",
-        success: true,
+    //incorrect password
+    if (!bcrypt.compareSync(req.body.password, user.password)) {
+      return res.status(401).json({
+        tite: 'login failed',
+        error: 'invalid credentials'
       })
-      .cookie("access_token", token, {
-        httpOnly: true,
-        secure: process.env.JWT_KEY,
-      });
-  } catch (err) {
-    res.status(500).send({
-      message: err.message,
-      success: false,
-    });
-  }
+    }
+    //IF ALL IS GOOD create a token and send to frontend
+    let token = jwt.sign({ userId: user._id}, 'secretkey');
+    return res.status(200).json({
+      title: 'login sucess',
+      token: token
+    })
+  });
 });
 
 //auth logout

@@ -5,9 +5,12 @@ const usersModel = require("../models/user-model");
 const bcrypt = require("bcrypt");
 
 router.get("/", (req, res) => {
-  res.render("home", {
-    user: req.user,
-  });
+  // res.render("home", {
+  //   user: req.user,
+  // });
+  // const { token } =req.body
+  // const user = jwt.verify(token)
+  // console.log(user)
   // res.send("you are logged in , this is your profile " + req.user.username);
 });
 
