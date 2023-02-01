@@ -62,27 +62,21 @@ router.post("/", async function (req, res, next) {
 //   }
 // });
 
-//grabbing user info
-router.get("/user", (req, res, next) => {
-  let token = req.headers.token; //token
-  jwt.verify(token, "secretkey", (err, decoded) => {
-    if (err)
-      return res.status(401).json({
-        title: "unauthorized",
-      });
-    //token is valid
-    User.findOne({ _id: decoded.userId }, (err, user) => {
-      if (err) return console.log(err);
-      return res.status(200).json({
-        title: "user grabbed",
-        user: {
-          email: user.email,
-          name: user.name,
-        },
-      });
-    });
-  });
-});
+router.get("/",async function(req,res,next){
+  try{
+    
+    let users = await usersModel.find()
+    return res.send({
+      data: users,
+      message: true,
+    })
+  }catch(error){
+    return res.status(500).send({
+      message : error.message,
+      success : false,
+    })
+  }
+})
 
 router.get("/:id", async function (req, res, next) {
   try {
@@ -112,21 +106,16 @@ router.get("/:id", async function (req, res, next) {
 router.put("/:id", async function (req, res, next) {
   try {
     let id = req.params.id;
-    let { username, password, fname, lname, nickname, age, gradueted, about } =
+    let { email, fname, lname } =
       req.body;
-    let hashPassword = await bcrypt.hash(password, 10);
+    // let hashPassword = await bcrypt.hash(password, 10);
     await usersModel.updateOne(
       { _id: mongoose.Types.ObjectId(id) },
       {
         $set: {
-          username,
-          password: hashPassword,
+          email,
           fname,
           lname,
-          nickname,
-          age,
-          gradueted,
-          about,
         },
       }
     );

@@ -8,7 +8,7 @@ const passportSetup = require("./config/passport-setup");
 const passport = require("passport");
 
 const verfyToken = require("./middleware/jwt_decode");
-// const userRoutes = require("./routes/user-routes");
+const userRoutes = require("./routes/user-routes");
 const indexRoutes = require("./routes/index-routes");
 const authRoutes = require("./routes/auth-routes");
 const profileRoutes = require("./routes/profile-routes");
@@ -71,7 +71,7 @@ app.use("/profile", profileRoutes);
 app.use("/register", registerRoutes);
 app.use("/", indexRoutes);
 // app.use("/user", verfyToken,userRoutes);
-// app.use("/user",userRoutes);
+app.use("/crud",userRoutes);
 app.get("/user", (req, res, next) => {
   let token = req.headers.token; //token
   // console.log(token);
@@ -87,7 +87,7 @@ app.get("/user", (req, res, next) => {
         title: "user grabbed",
         user: {
           email: user.email,
-          name: user.name,
+          fname: user.fname,
         },
       });
     });
